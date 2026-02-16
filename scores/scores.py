@@ -21,9 +21,9 @@ class Score(dict):
         self['an'] = self._read_analyses(analyses)
         self.json = '_'.join([field, level, stream, centre, ftype, self['version']]) + '.json'
 
-    def compute(self, score):
-        compute_score = getattr(self, '_'+score)
-        self[score] = {}
+    def compute(self, scores):
+        for score in scores:
+            self[score] = {}
         for m in range(min(self['months']), max(self['months'])+1):
             print("Running month "+str(m))
             month = "%02d" % m
@@ -39,13 +39,15 @@ class Score(dict):
                     hr = round(float(fcst / 3600e9))
                     if hr % 12 != 0 or hr > 240: continue
                     vtime = init + fcst
-                    for an in self['an'].values():
-                        fld_an = an.sel(forecast_reference_time=vtime)
-                        scorev = compute_score(this_fcst, fld_an)
-                    try:
-                        self[score][hr].append(scorev)
-                    except(KeyError):
-                        self[score][hr] = [scorev]
+                    for score in scores:
+                        compute_score = getattr(self, '_'+score)
+                        for an in self['an'].values():
+                            fld_an = an.sel(forecast_reference_time=vtime)                            
+                            scorev = compute_score(this_fcst, fld_an)
+                        try:
+                            self[score][hr].append(scorev)
+                        except(KeyError):
+                            self[score][hr] = [scorev]
 
     def write(self, fn):
         filt_dict = {
@@ -104,7 +106,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     sc = Score(args.centre, args.stream, args.type, args.version, args.field, args.level, args.anal)
-    for score in args.score:
-        sc.compute(score)
+    sc.compute(args.score)
     sc.write(sc.json)
         
