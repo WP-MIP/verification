@@ -12,7 +12,7 @@ class Score(dict):
         self['centre'] = centre
         self['stream'] = stream
         self['ftype'] = ftype
-        self['version'] = "%02d" % version
+        self['version'] = "%02d" % int(version)
         self['field'] = field
         self['level'] = level
         self['analyses'] = analyses
@@ -60,6 +60,11 @@ class Score(dict):
         msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
         rmse = (msf * (dsf - dsa)**2).mean(dim=['latitude', 'longitude']) / msf.mean()
         return(rmse[self['field']].values.item())
+
+    def _bias(self, dsf, dsa):
+        msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
+        bias = (msf * (dsf - dsa)).mean(dim=['latitude', 'longitude']) / msf.mean()
+        return(bias[self['field']].values.item())
         
     def _read_analyses(self, analyses):
         anvals = {}
@@ -94,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--stream', default='oic', help='WP-MIP stream (oic/sic)')
     parser.add_argument('-t', '--type', default='pm', help='Model type (pm/hy/ai)')
     parser.add_argument('-r', '--version', default=0, help='Model version (integer)')
-    parser.add_argument('--score', default=['rmse'], action='append', help='Scores to compute')
+    parser.add_argument('--score', action='append', help='Scores to compute')
     parser.add_argument('--anal', default=['ecmf'], action='append', help='Analyses for scoring')
     args = parser.parse_args()
 
