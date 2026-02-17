@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+nthreads=6
+
+runscore(){
+    args=("$@")
+    nargs=${#args[@]}
+    fn=${args[0]}
+    tfile=${args[1]}
+    score=''
+    for (( i=2; i<${nargs}; i++ )) ; do
+	score="${score} --score ${args[i]}"
+    done
+    touch ${tfile}
+    var=$(echo ${fn} | cut -d '_' -f 1)
+    lev=$(echo ${fn} | cut -d '_' -f 2)
+    stream=$(echo ${fn} | cut -d '_' -f 3)
+    centre=$(echo ${fn} | cut -d '_' -f 4)
+    mtype=$(echo ${fn} | cut -d '_' -f 5)
+    version=$(echo ${fn} | cut -d '_' -f 6)
+    ./scores.py -c ${centre} -s ${stream} -t ${mtype} -r ${version} ${score} -- ${var} ${lev}
+    rm -f ${tfile}
+}
+
+tprefix=.thread
+rm -f ${tprefix}_*
+for fcst in $(find forecasts -name "*01.grib2"); do
+    sleep 1
+    tfile=${tprefix}_$(basename ${fcst})
+    while [[ $(ls -1 ${tprefix}* 2>/dev/null | wc -l) -ge ${nthreads} ]] ; do
+	sleep 5
+    done
+    runscore $(basename ${fcst}) ${tfile} rmse bias &
+done
+wait
