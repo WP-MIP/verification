@@ -17,8 +17,8 @@ class Spec(dict):
         self['version'] = "%02d" % int(version)
         self['field'] = field
         self['level'] = level
-        self['lead'] = lead
-        self['months'] = (1,1)
+        self['lead'] = int(lead)
+        self['months'] = (1,12)
         self['icdates'] = self._set_icdates()
         slead = "%03d" % self['lead']
         self.json = '_'.join(['spec', field, level, stream, centre, ftype, self['version'], slead]) + '.json'
@@ -60,13 +60,13 @@ class Spec(dict):
                     (fout, fout2) = rmn.ezuvint(dgrid['id'], sgrid['id'],
                                                 df[i,:,:].T, df2[i,:,:].T)
                     (deg, en, en_rot, en_div) = \
-                        spharm.do_transform_ke(fout, fout2, assume_latlon='lonlat')
+                        spharm.do_transform_ke(fout, fout2, assume_latlon='lonlat', flip_lat=True)
                     self['enrot'].append(en_rot.tolist())
                     self['endiv'].append(en_div.tolist())
                 except TypeError:
                     fout = rmn.ezsint(dgrid['id'], sgrid['id'], df[i,:,:].T)
                     (deg, en) = \
-                        spharm.do_transform_scalar(fout, assume_latlon='lonlat')
+                        spharm.do_transform_scalar(fout, assume_latlon='lonlat', flip_lat=True)
                 if len(self['deg']) == 0: self['deg'] = deg.tolist()
                 self['en'].append(en.tolist())
                             
