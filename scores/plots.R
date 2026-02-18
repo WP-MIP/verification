@@ -2,8 +2,8 @@ library(jsonlite)
 library(boot)
 
 # Basic setup
-source("centres.R")   #defines "centres"
-source("scorespec.R") #defines "spec"
+source("../centres.R")   #defines "centres"
+source("scorespec.R")    #defines "spec"
 set.seed(123)
 
 # User configuration
