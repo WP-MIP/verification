@@ -25,6 +25,6 @@ for fcst in $(find forecasts -name "u_*01.grib2"); do
     while [[ $(ls -1 ${tprefix}* 2>/dev/null | wc -l) -ge ${nthreads} ]] ; do
 	sleep 5
     done
-    runspec $(basename ${fcst}) ${tfile} ke 120 &
+    runspec $(basename ${fcst}) ${tfile} ke 240 &
 done
 wait
