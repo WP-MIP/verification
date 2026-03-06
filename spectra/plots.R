@@ -9,8 +9,8 @@ set.seed(123)
 # User configuration
 field <- "ke"
 level <- 250
-lead <- 240
-nboot <- 10
+lead <- 120
+nboot <- 1000
 
 # Utility functions
 meanfun <- function(data, i){
@@ -21,20 +21,27 @@ tcol <- function(col, trans=0.8){
     return(rgb(rgb.val[1], rgb.val[2], rgb.val[3],
                max=255, alpha=(1-trans) * 255))
 }
+floor <- function(x){return(max(x, 1e-10))}
 compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     ci.type <- "basic"
+    small <- 1e-10
     fmean <- c()
     fmean.low <- c()
     fmean.high <- c()
     wns <- seq(1, ncol(d.fcst[[lscore]]))
     for (wn in wns){
         d <- d.fcst[[lscore]][,wn]
-        if (is.ratio){d <- d / d.ref[[lscore]][,wn]}            
+        if (is.ratio){d <- sapply(d, floor) / sapply(d.ref[[lscore]][,wn], floor)}
         draws <- boot(d, statistic=meanfun, R=nboot)
-        ci <- boot.ci(draws, 0.95, ci.type)[[ci.type]]
         fmean <- c(fmean, draws$t0)
-        fmean.low <- c(fmean.low, ci[4])
-        fmean.high <- c(fmean.high, ci[5])
+        if (length(unique(d)) == 1){
+            fmean.low <- c(fmean.low, draws$t0)
+            fmean.high <- c(fmean.high, draws$t0)
+        } else {
+            ci <- boot.ci(draws, 0.95, ci.type)[[ci.type]]
+            fmean.low <- c(fmean.low, ci[4])
+            fmean.high <- c(fmean.high, ci[5])
+        }
     }
     return(list('mean'=fmean, 'low'=fmean.low, 'high'=fmean.high, 'wns'=wns))
 }
@@ -53,19 +60,17 @@ genPlot <- function(score, stream, mtype){
     # Prepare output file
     ofile <- paste(paste(score, stream, mtype, as.character(lead), sep='_'), 'pdf', sep='.')
     pdf(ofile, paper='special', width=8, height=5, bg='white')
-    default <- par(mar=c(5,5,4,2))
+    default <- par(mar=c(5,7,4,2))
 
     # Generate plot background
-    units <- spec[[field]][[score]]$units
-    ylab <- spec[[field]][[score]]$name
-    if (!is.na(units)){
-        ylab <- paste(ylab, ' (', spec[[field]][[score]]$units, ')', sep='')
-    }
     plot(c(1, 2), c(1, 2), type='n', xaxt='n', yaxt='n', xaxs='i', log=spec[[field]][[score]]$log,
-         xlab='Wavenumber', ylab=ylab, cex.lab=charsize, xlim=spec[[field]][[score]]$xrange,
+         xlab='Wavenumber', ylab=NA, cex.lab=charsize, xlim=spec[[field]][[score]]$xrange,
          ylim=spec[[field]][[score]]$yrange)
     axis(1, cex.axis=charsize)
     axis(2, cex.axis=charsize, las=1)
+    mtext(spec[[field]][[score]]$name, 2, line=5, cex=charsize)
+    hline <- spec[[field]][[score]]$hline
+    if (!is.na(hline)) abline(h=hline, lwd=2, lty=2)
     leg.centre <- c()
     leg.col <- c()
 
@@ -83,7 +88,7 @@ genPlot <- function(score, stream, mtype){
     
     # Process data by centre
     for (c in seq(1, length(centre))){
-        
+
         # Retrieve input data
         lstream <- stream
         if (centre[[c]]$id == 'ecmf'){lstream <- 'oic'}
@@ -93,7 +98,7 @@ genPlot <- function(score, stream, mtype){
         
         # Boostrap for confidence intervals
         fmean <- compute.stats(d.fcst, d.ref, is.ratio, lscore)
-        
+
         # Add lines
         plot.line(fmean, centre[[c]]$col, lwd)
 
@@ -114,13 +119,13 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-genPlot('en', 'oic', 'ai')
-stop()
+#genPlot('en-ratio', 'oic', 'ai')
+#stop()
 
 
 for (stream in c('oic', 'sic')){
     for (mtype in c('ai', 'hy', 'pm')){
-        for (score in c('en', 'enrot', 'endiv')){
+        for (score in c('en', 'en-ratio', 'enrot', 'endiv')){
             genPlot(score, stream, mtype)
         }
     }
