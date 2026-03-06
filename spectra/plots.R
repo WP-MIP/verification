@@ -9,7 +9,7 @@ set.seed(123)
 # User configuration
 field <- "ke"
 level <- 250
-lead <- 120
+lead <- 240
 nboot <- 1000
 
 # Utility functions
@@ -28,12 +28,14 @@ compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     fmean <- c()
     fmean.low <- c()
     fmean.high <- c()
+    wnlist <- c()
     wns <- seq(1, ncol(d.fcst[[lscore]]))
     for (wn in wns){
         d <- d.fcst[[lscore]][,wn]
         if (is.ratio){d <- sapply(d, floor) / sapply(d.ref[[lscore]][,wn], floor)}
         draws <- boot(d, statistic=meanfun, R=nboot)
         fmean <- c(fmean, draws$t0)
+        wnlist <- c(wnlist, d.fcst[['deg']][wn])
         if (length(unique(d)) == 1){
             fmean.low <- c(fmean.low, draws$t0)
             fmean.high <- c(fmean.high, draws$t0)
@@ -43,7 +45,7 @@ compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
             fmean.high <- c(fmean.high, ci[5])
         }
     }
-    return(list('mean'=fmean, 'low'=fmean.low, 'high'=fmean.high, 'wns'=wns))
+    return(list('mean'=fmean, 'low'=fmean.low, 'high'=fmean.high, 'wns'=wnlist))
 }
 plot.line <- function(fmean, col, lwd, lty=1){
     polygon(c(fmean$wns, rev(fmean$wns)), c(fmean$low, rev(fmean$high)), col=tcol(col), border=NA)
