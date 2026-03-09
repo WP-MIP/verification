@@ -32,7 +32,7 @@ compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     wns <- seq(1, ncol(d.fcst[[lscore]]))
     for (wn in wns){
         d <- d.fcst[[lscore]][,wn]
-        if (is.ratio){d <- sapply(d, floor) / sapply(d.ref[[lscore]][,wn], floor)}
+        if (is.ratio){d <- sapply(sqrt(d), floor) / sapply(sqrt(d.ref[[lscore]][,wn]), floor)}
         draws <- boot(d, statistic=meanfun, R=nboot)
         fmean <- c(fmean, draws$t0)
         wnlist <- c(wnlist, d.fcst[['deg']][wn])
@@ -79,13 +79,13 @@ genPlot <- function(score, stream, mtype){
     # Retrieve reference data
     is.ratio <- grepl('-ratio', score)
     lscore <- sub('-ratio', '', score)
-    fname <- paste(paste('spec', field, level, 'oic', 'ecmf', 'pm', '00', lead, sep='_'), 'json', sep='.')
+    fname <- paste(paste('spec', field, level, 'oic', 'ecmf', 'pm', '00', '000', sep='_'), 'json', sep='.')
     d.ref <- fromJSON(fname)
 
     # Plot reference data
     if (! is.ratio && mtype != 'pm'){
         fmean <- compute.stats(d.ref, d.ref, FALSE, lscore)
-        plot.line(fmean, 'grey', 1, lty=5)
+        plot.line(fmean, 'grey', 3, lty=5)
     }
     
     # Process data by centre
@@ -121,7 +121,7 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-#genPlot('en-ratio', 'oic', 'ai')
+#genPlot('en-ratio', 'oic', 'hy')
 #stop()
 
 
