@@ -23,8 +23,13 @@ tcol <- function(col, trans=0.8){
 }
 myfloor <- function(x){return(max(x, 1e-10))}
 refslope <- function(wn, slope, pt){return((pt[2] / pt[1]**slope) * wn**slope)}
-towl <- function(wn){return(2*pi*3760/wn)}
+towl <- function(wn){return(2*pi*6371/wn)}
 get_axp <- function(x){return(10^c(ceiling(x[1]), floor(x[2])))}
+get_fname <- function(centre_id, stream, mtype){
+    lstream <- stream
+    if (centre_id == 'ecmf'){lstream <- 'oic'}
+    return(paste(paste('spec', field, level, lstream, centre_id, mtype, '00', lead, sep='_'), 'json', sep='.'))
+}
 compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     ci.type <- "basic"
     small <- 1e-10
@@ -89,9 +94,17 @@ genPlot <- function(score, stream, mtype){
     # Retrieve reference data
     is.ratio <- grepl('-ratio', score)
     lscore <- sub('-ratio', '', score)
-    fname <- paste(paste('spec', field, level, 'oic', 'ecmf', 'pm', '00', '000', sep='_'), 'json', sep='.')
-    d.ref <- fromJSON(fname)
+    d.ref <- fromJSON(get_fname('ecmf', 'oic', 'pm'))
 
+    # Add filter cutoffs if needed
+    if (mtype == 'hy' && is.ratio){
+        for (c in seq(1, length(centre))){
+            if (!is.na(centre[[c]]$cutoff) && file.exists(get_fname(centre[[c]]$id, stream, mtype))){
+                abline(v=centre[[c]]$cutoff, col=centre[[c]]$col)
+            }
+        }
+    }
+    
     # Generate reference lines
     if (! is.ratio){
         wnl <- seq(20, 100)
@@ -114,9 +127,7 @@ genPlot <- function(score, stream, mtype){
     for (c in seq(1, length(centre))){
 
         # Retrieve input data
-        lstream <- stream
-        if (centre[[c]]$id == 'ecmf'){lstream <- 'oic'}
-        fname <- paste(paste('spec', field, level, lstream, centre[[c]]$id, mtype, '00', lead, sep='_'), 'json', sep='.')
+        fname <- get_fname(centre[[c]]$id, stream, mtype)
         if (! file.exists(fname)){ next }
         d.fcst <- fromJSON(fname)
         
@@ -143,7 +154,7 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-#genPlot('en', 'sic', 'hy')
+#genPlot('en-ratio', 'sic', 'hy')
 #stop()
 
 
