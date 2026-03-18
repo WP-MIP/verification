@@ -116,8 +116,9 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-#genPlot('bias', 'oic', 'ai')
-#stop()
+genPlot('rmse', 'oic', 'ai')
+genPlot('bias', 'oic', 'ai')
+stop()
 
 for (stream in c('oic', 'sic')){
     for (mtype in c('ai', 'hy', 'pm')){

@@ -21,7 +21,10 @@ tcol <- function(col, trans=0.8){
     return(rgb(rgb.val[1], rgb.val[2], rgb.val[3],
                max=255, alpha=(1-trans) * 255))
 }
-floor <- function(x){return(max(x, 1e-10))}
+myfloor <- function(x){return(max(x, 1e-10))}
+refslope <- function(wn, slope, pt){return((pt[2] / pt[1]**slope) * wn**slope)}
+towl <- function(wn){return(2*pi*3760/wn)}
+get_axp <- function(x){return(10^c(ceiling(x[1]), floor(x[2])))}
 compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     ci.type <- "basic"
     small <- 1e-10
@@ -32,7 +35,7 @@ compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     wns <- seq(1, ncol(d.fcst[[lscore]]))
     for (wn in wns){
         d <- d.fcst[[lscore]][,wn]
-        if (is.ratio){d <- sapply(sqrt(d), floor) / sapply(sqrt(d.ref[[lscore]][,wn]), floor)}
+        if (is.ratio){d <- sapply(sqrt(d), myfloor) / sapply(sqrt(d.ref[[lscore]][,wn]), myfloor)}
         draws <- boot(d, statistic=meanfun, R=nboot)
         fmean <- c(fmean, draws$t0)
         wnlist <- c(wnlist, d.fcst[['deg']][wn])
@@ -59,6 +62,11 @@ genPlot <- function(score, stream, mtype){
     charsize <- 1.4
     lwd <- 3
     
+    # Convert wavenumber to wavelength
+    xlims <- towl(spec[[field]][[score]]$xrange)
+    usr.i <- log10(xlims)
+    wl.ticks <- axTicks(3, usr=usr.i, axp=c(get_axp(usr.i), n=3), log=TRUE, nintLog=5)
+    
     # Prepare output file
     ofile <- paste(paste(score, stream, mtype, as.character(lead), sep='_'), 'pdf', sep='.')
     pdf(ofile, paper='special', width=8, height=5, bg='white')
@@ -66,22 +74,36 @@ genPlot <- function(score, stream, mtype){
 
     # Generate plot background
     plot(c(1, 2), c(1, 2), type='n', xaxt='n', yaxt='n', xaxs='i', log=spec[[field]][[score]]$log,
-         xlab='Wavenumber', ylab=NA, cex.lab=charsize, xlim=spec[[field]][[score]]$xrange,
+         xlab='Global Spherical Wavenumber', ylab=NA, cex.lab=charsize, xlim=spec[[field]][[score]]$xrange,
          ylim=spec[[field]][[score]]$yrange)
     axis(1, cex.axis=charsize)
     axis(2, cex.axis=charsize, las=1)
+    axis(3, at=towl(wl.ticks), labels=wl.ticks)
+    mtext('km', side=3, at=max(spec[[field]][[score]]$xrange - 65), line=1)
     mtext(spec[[field]][[score]]$name, 2, line=5, cex=charsize)
     hline <- spec[[field]][[score]]$hline
     if (!is.na(hline)) abline(h=hline, lwd=2, lty=2)
     leg.centre <- c()
     leg.col <- c()
-
+    
     # Retrieve reference data
     is.ratio <- grepl('-ratio', score)
     lscore <- sub('-ratio', '', score)
     fname <- paste(paste('spec', field, level, 'oic', 'ecmf', 'pm', '00', '000', sep='_'), 'json', sep='.')
     d.ref <- fromJSON(fname)
 
+    # Generate reference lines
+    if (! is.ratio){
+        wnl <- seq(20, 100)
+        kel <- refslope(wnl, -3, c(min(wnl),20))
+        lines(wnl, kel)
+        text(50, 5, labels='-3', cex=1.2)
+        wnl <- seq(120,600)
+        kel <- refslope(wnl, -5/3, c(min(wnl),0.1))
+        text(270, 0.1, labels='-5/3', cex=1.2)
+        lines(wnl, kel)
+    }
+    
     # Plot reference data
     if (! is.ratio && mtype != 'pm'){
         fmean <- compute.stats(d.ref, d.ref, FALSE, lscore)
@@ -121,7 +143,7 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-#genPlot('en-ratio', 'oic', 'hy')
+#genPlot('en', 'sic', 'hy')
 #stop()
 
 
