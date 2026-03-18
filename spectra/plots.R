@@ -100,7 +100,7 @@ genPlot <- function(score, stream, mtype){
     if (mtype == 'hy' && is.ratio){
         for (c in seq(1, length(centre))){
             if (!is.na(centre[[c]]$cutoff) && file.exists(get_fname(centre[[c]]$id, stream, mtype))){
-                abline(v=centre[[c]]$cutoff, col=centre[[c]]$col)
+                abline(v=centre[[c]]$cutoff, col=centre[[c]]$col, lty=3, lwd=2)
             }
         }
     }
@@ -154,8 +154,8 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-#genPlot('en-ratio', 'sic', 'hy')
-#stop()
+genPlot('en-ratio', 'oic', 'hy')
+stop()
 
 
 for (stream in c('oic', 'sic')){
