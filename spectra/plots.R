@@ -154,8 +154,8 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-genPlot('en-ratio', 'oic', 'hy')
-stop()
+#genPlot('en-ratio', 'oic', 'hy')
+#stop()
 
 
 for (stream in c('oic', 'sic')){
