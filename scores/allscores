@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-nthreads=6
+nthreads=7
 
 runscore(){
     args=("$@")
@@ -18,7 +18,8 @@ runscore(){
     centre=$(echo ${fn} | cut -d '_' -f 4)
     mtype=$(echo ${fn} | cut -d '_' -f 5)
     version=$(echo ${fn} | cut -d '_' -f 6)
-    ./scores.py -c ${centre} -s ${stream} -t ${mtype} -r ${version} ${score} -- ${var} ${lev}
+    ./scores.py -c ${centre} -s ${stream} -t ${mtype} -r ${version} ${score} \
+		--anal=cwao --anal=egrr --anal=kwbc --anal=rums -- ${var} ${lev}
     rm -f ${tfile}
 }
 

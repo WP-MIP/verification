@@ -44,10 +44,10 @@ class Score(dict):
                         for an in self['an'].values():
                             fld_an = an.sel(forecast_reference_time=vtime)                            
                             scorev = compute_score(this_fcst, fld_an)
-                        try:
-                            self[score][hr].append(scorev)
-                        except(KeyError):
-                            self[score][hr] = [scorev]
+                            try:
+                                self[score][hr].append(scorev)
+                            except(KeyError):
+                                self[score][hr] = [scorev]
 
     def write(self, fn):
         filt_dict = {
@@ -70,18 +70,16 @@ class Score(dict):
         
     def _read_analyses(self, analyses):
         anvals = {}
-        an_data = []
         for analysis in self['analyses']:
+            an_data = []
             for m in range(min(self['months']), max(self['months'])+2):
                 month = "%02d" % m
                 fname = '_'.join([self['field'], self['level'], analysis, 'pl', month])+'.grib2'
                 fpath = os.path.join('analyses', fname)
                 ds = ek.data.from_source('file', fpath).to_xarray()
                 an_data.append(ds)
-            print("done reading")
             anvals[analysis] = (xr.concat(an_data, 'forecast_reference_time', data_vars="minimal",
                                           coords="minimal", compat="override"))
-            print("done concat")
         return(anvals)
 
     def _set_icdates(self):
@@ -104,7 +102,7 @@ if __name__ == "__main__":
     parser.add_argument('--score', action='append', help='Scores to compute')
     parser.add_argument('--anal', default=['ecmf'], action='append', help='Analyses for scoring')
     args = parser.parse_args()
-
+    
     sc = Score(args.centre, args.stream, args.type, args.version, args.field, args.level, args.anal)
     sc.compute(args.score)
     sc.write(sc.json)
