@@ -60,8 +60,8 @@ class Score(dict):
 
     def _rmse(self, dsf, dsa):
         msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
-        rmse = (msf * (dsf - dsa)**2).mean(dim=['latitude', 'longitude']) / msf.mean()
-        return(rmse[self['field']].values.item())
+        mse = (msf * (dsf - dsa)**2).mean(dim=['latitude', 'longitude']) / msf.mean()
+        return(sqrt(mse[self['field']].values.item()))
 
     def _bias(self, dsf, dsa):
         msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
