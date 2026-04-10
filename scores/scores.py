@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import glob, os, sys, json
+import glob, os, sys, json, math
 import earthkit as ek
 import xarray as xr
 import pandas as pd
@@ -61,7 +61,7 @@ class Score(dict):
     def _rmse(self, dsf, dsa):
         msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
         mse = (msf * (dsf - dsa)**2).mean(dim=['latitude', 'longitude']) / msf.mean()
-        return(sqrt(mse[self['field']].values.item()))
+        return(math.sqrt(mse[self['field']].values.item()))
 
     def _bias(self, dsf, dsa):
         msf = xr.ufuncs.cos(xr.ufuncs.radians(dsa.latitude))
