@@ -28,7 +28,9 @@ get_axp <- function(x){return(10^c(ceiling(x[1]), floor(x[2])))}
 get_fname <- function(centre_id, stream, mtype){
     lstream <- stream
     if (centre_id == 'ecmf'){lstream <- 'oic'}
-    return(paste(paste('spec', field, level, lstream, centre_id, mtype, '00', lead, sep='_'), 'json', sep='.'))
+    fnames <- Sys.glob(paste(paste('spec', field, level, lstream, centre_id, mtype, '??', lead, sep='_'), 'json', sep='.'))
+    if (length(fnames) < 1){return('No_File')}
+    return(fnames[1])
 }
 compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     ci.type <- "basic"

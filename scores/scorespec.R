@@ -6,9 +6,9 @@ spec <- list()
 
 v <- 't'
 spec[[v]] <- list()
-spec[[v]][['rmse']] <- set.specs("RMSE", "K", c(0,14))
-spec[[v]][['rmse-ref']] <- set.specs("RMSE", "K", c(-3,3), hline=0, leg='bottomleft')
-spec[[v]][['bias']] <- set.specs("Bias", "K", c(-1,1), hline=0, ncol=3)
+spec[[v]][['rmse']] <- set.specs("RMSE", "K", c(0,4.5), leg='topleft', ncol=2)
+spec[[v]][['rmse-ref']] <- set.specs("RMSE", "K", c(-0.7,0.7), hline=0, leg='bottomleft', ncol=3)
+spec[[v]][['bias']] <- set.specs("Bias", "K", c(-0.6,0.6), hline=0, ncol=3)
 spec[[v]][['acor']] <- set.specs("Anomaly Correlation", NA, c(0,1), hline=1)
 
 v <- 'gh'
