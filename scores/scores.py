@@ -30,7 +30,7 @@ class Score(dict):
             fname = '_'.join([self['field'], self['level'], self['stream'], self['centre'],
                               self['ftype'], self['version'], 'pl', month])+'.grib2'
             fpath = os.path.join('forecasts', self['stream'], fname)
-            ds = ek.data.from_source('file', fpath).to_xarray()
+            ds = ek.data.from_source('file', fpath).to_xarray(allow_holes=True)
             for init, this_init in ds.groupby("forecast_reference_time"):
                 init_dt = datetime.fromisoformat(str(this_init.forecast_reference_time.values[0]))
                 if init_dt not in self['icdates']:
