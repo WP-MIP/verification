@@ -16,7 +16,7 @@ scores <- c('rmse-ref', 'rmse', 'bias')
 meanfun <- function(data, i){
     return(mean(data[i]))
 }
-tcol <- function(col, trans=0.8){
+tcol <- function(col, trans=0.6){
     rgb.val <- col2rgb(col)
     return(rgb(rgb.val[1], rgb.val[2], rgb.val[3],
                max=255, alpha=(1-trans) * 255))
