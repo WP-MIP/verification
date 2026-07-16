@@ -91,7 +91,7 @@ genPlot <- function(score, stream, mtype){
         if (centre[[c]]$id == 'ecmf'){lstream <- 'oic'}
         fnames <- Sys.glob(paste(paste(field, level, lstream, centre[[c]]$id, mtype, '??', sep='_'), 'json', sep='.'))
         if (length(fnames) < 1){ next }
-        d.fcst <- fromJSON(fnames[1])
+        d.fcst <- fromJSON(fnames[length(fnames)])
         
         # Boostrap for confidence intervals
         fmean <- compute.stats(d.fcst, d.ref, is.ref, lscore)
@@ -116,10 +116,10 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-genPlot('rmse-ref', 'oic', 'pm')
+#genPlot('rmse-ref', 'oic', 'pm')
 #genPlot('bias', 'oic', 'pm')
 #genPlot('rmse-ref', 'oic', 'ai')
-stop()
+#stop()
 
 for (stream in c('oic', 'sic')){
     for (mtype in c('ai', 'hy', 'pm')){

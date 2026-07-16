@@ -30,7 +30,7 @@ get_fname <- function(centre_id, stream, mtype){
     if (centre_id == 'ecmf'){lstream <- 'oic'}
     fnames <- Sys.glob(paste(paste('spec', field, level, lstream, centre_id, mtype, '??', lead, sep='_'), 'json', sep='.'))
     if (length(fnames) < 1){return('No_File')}
-    return(fnames[1])
+    return(fnames[length(fnames)])
 }
 compute.stats <- function(d.fcst, d.ref, is.ratio, lscore){
     ci.type <- "basic"
@@ -156,8 +156,8 @@ genPlot <- function(score, stream, mtype){
 
 # Main calculations
 
-genPlot('en-ratio', 'oic', 'pm')
-stop()
+#genPlot('en-ratio', 'oic', 'pm')
+#stop()
 
 
 for (stream in c('oic', 'sic')){
